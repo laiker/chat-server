@@ -1,0 +1,60 @@
+volumes:
+  postgres_volume-chat:
+  postgres_volume_prod-chat:
+
+services:
+  pg-local-chat:
+    image: postgres:14-alpine3.17
+    env_file:
+      - .env
+    ports:
+      - "54323:5433"
+    command: ["postgres", "-p", "5433"]
+    volumes:
+      - postgres_volume-chat:/var/lib/postgresql/data
+    container_name: pg-local-chat
+    networks:
+      - chat-network
+
+  pg-prod-chat:
+    image: postgres:14-alpine3.17
+    env_file:
+      - .env
+    ports:
+      - "54324:5433"
+    command: ["postgres", "-p", "5433"]
+    volumes:
+      - postgres_volume_prod-chat:/var/lib/postgresql/data
+    container_name: pg-prod-chat
+    networks:
+      - chat-network
+
+  migrator-local:
+    build:
+      context: .
+      dockerfile: migration_local.Dockerfile
+    restart: on-failure
+    environment:
+      DB_HOST: pg-local-chat
+    depends_on:
+      - pg-local-chat
+    container_name: migrator-local
+    networks:
+      - chat-network
+
+  migrator-prod:
+    build:
+      context: .
+      dockerfile: migration_prod.Dockerfile
+    restart: on-failure
+    environment:
+      DB_HOST: pg-prod-chat
+    depends_on:
+      - pg-prod-chat
+    container_name: migrator-prod
+    networks:
+      - chat-network
+
+networks:
+  chat-network:
+    external: true

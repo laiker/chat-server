@@ -1,2 +1,5 @@
 .idea
 /bin/
+.local.env
+.prod.env
+.env
