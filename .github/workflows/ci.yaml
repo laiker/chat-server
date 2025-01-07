@@ -81,7 +81,7 @@ jobs:
             fi
             
             # Run a new container from a new image
-            docker run -d --network $NETWORK -p $SERVER_PORT:$SERVER_PORT --name $CONTAINER_NAME -t $REGISTRY/$IMAGE_NAME:$TAG_NAME
+            docker run -d --network $NETWORK -p ${{ secrets.REGISTRY_USERNAME }}:${{ secrets.REGISTRY_USERNAME }} --name $CONTAINER_NAME -t $REGISTRY/$IMAGE_NAME:$TAG_NAME
             
             # Run migrator
             docker run -d --network $NETWORK --name $CONTAINER_MIGRATOR_NAME -t $REGISTRY/$IMAGE_MIGRATOR_NAME:$TAG_NAME
