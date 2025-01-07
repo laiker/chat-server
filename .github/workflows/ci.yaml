@@ -13,6 +13,7 @@ env:
   CONTAINER_MIGRATOR_NAME: "chat-migrator-container"
   IMAGE_MIGRATOR_NAME: "chat-migrator"
   NETWORK: "chat-network"
+  PORT: "50053"
 
 jobs:
   image-build-and-push:
@@ -62,7 +63,7 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSHKEY }}
-          envs: IMAGE_NAME,REGISTRY,GITHUB_SHA,CONTAINER_NAME,CONTAINER_MIGRATOR_NAME,IMAGE_MIGRATOR_NAME,NETWORK,SERVER_PORT
+          envs: IMAGE_NAME,REGISTRY,GITHUB_SHA,CONTAINER_NAME,CONTAINER_MIGRATOR_NAME,IMAGE_MIGRATOR_NAME,NETWORK,PORT
           script: |
             # Set up variables
             TAG_NAME=$(echo $GITHUB_SHA | head -c7)
@@ -81,7 +82,7 @@ jobs:
             fi
             
             # Run a new container from a new image
-            docker run -d --network $NETWORK -p ${{ secrets.REGISTRY_USERNAME }}:${{ secrets.REGISTRY_USERNAME }} --name $CONTAINER_NAME -t $REGISTRY/$IMAGE_NAME:$TAG_NAME
+            docker run -d --network $NETWORK -p $PORT:$PORT --name $CONTAINER_NAME -t $REGISTRY/$IMAGE_NAME:$TAG_NAME
             
             # Run migrator
             docker run -d --network $NETWORK --name $CONTAINER_MIGRATOR_NAME -t $REGISTRY/$IMAGE_MIGRATOR_NAME:$TAG_NAME
