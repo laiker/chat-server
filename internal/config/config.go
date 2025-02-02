@@ -4,6 +4,8 @@ import (
 	"github.com/joho/godotenv"
 )
 
+var ConfigPathKey = "configPathKey"
+
 type GRPCConfig interface {
 	Address() string
 }

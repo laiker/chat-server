@@ -40,7 +40,7 @@ local-migration-down:
 	$(LOCAL_BIN)/goose -dir ${LOCAL_MIGRATION_DIR} postgres ${LOCAL_MIGRATION_DSN} down -v
 
 start:
-	docker-compose up -d pg-local-chat migrator-local-chat
+	docker-compose up -d pg-local-chat migrator-local
 	go run cmd/main.go --config-path=.env
 
 restart:
