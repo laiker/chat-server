@@ -2,6 +2,7 @@ package chat
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/golang/protobuf/ptypes/empty"
@@ -12,20 +13,21 @@ import (
 
 type Server struct {
 	chat_v1.UnimplementedChatV1Server
-	chatService    service.ChatService
-	messageService service.MessageService
+	ChatService    service.ChatService
+	MessageService service.MessageService
 }
 
 func NewServer(chatService service.ChatService, messageService service.MessageService) *Server {
 	return &Server{
-		chatService:    chatService,
-		messageService: messageService,
+		ChatService:    chatService,
+		MessageService: messageService,
 	}
 }
 
 func (s *Server) Create(ctx context.Context, request *chat_v1.CreateRequest) (*chat_v1.CreateResponse, error) {
-	chatID, err := s.chatService.Create(ctx, converter.ToChatFromCreateRequest(request))
-
+	fmt.Println(converter.ToChatFromCreateRequest(request))
+	chatID, err := s.ChatService.Create(ctx, converter.ToChatFromCreateRequest(request))
+	fmt.Println(chatID)
 	if err != nil {
 		return nil, err
 	}
@@ -37,24 +39,24 @@ func (s *Server) Create(ctx context.Context, request *chat_v1.CreateRequest) (*c
 
 func (s *Server) SendMessage(ctx context.Context, request *chat_v1.SendMessageRequest) (*empty.Empty, error) {
 
-	_, err := s.messageService.Create(ctx, converter.ToMessageFromCreateRequest(request))
+	_, err := s.MessageService.Create(ctx, converter.ToMessageFromCreateRequest(request))
 
 	if err != nil {
 		return nil, err
 	}
 
-	return nil, nil
+	return &empty.Empty{}, nil
 }
 
 func (s *Server) Delete(ctx context.Context, request *chat_v1.DeleteRequest) (*empty.Empty, error) {
 	chatId := request.GetId()
-	err := s.chatService.Delete(ctx, chatId)
+	err := s.ChatService.Delete(ctx, chatId)
 
 	if err != nil {
 		log.Fatalf("failed to delete chat: %v", err)
 	}
 
-	err = s.messageService.Delete(ctx, chatId)
+	err = s.MessageService.Delete(ctx, chatId)
 
 	return &empty.Empty{}, nil
 }
