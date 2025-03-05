@@ -7,10 +7,14 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/laiker/auth/client/db"
-	"github.com/laiker/auth/internal/logger"
+	"github.com/laiker/chat-server/internal/logger"
 )
 
 var _ logger.BaseLogger = (*DBLogger)(nil)
+
+type DBLoggerInterface interface {
+	logger.BaseLogger
+}
 
 type DBLogger struct {
 	db db.Client

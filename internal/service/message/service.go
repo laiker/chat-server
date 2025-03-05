@@ -13,22 +13,22 @@ import (
 type serv struct {
 	repo      repository.MessageRepository
 	txManager db.TxManager
-	logger    logger.DBLogger
+	logger    logger.DBLoggerInterface
 }
 
-func NewMessageService(repo repository.MessageRepository, manager db.TxManager, logger logger.DBLogger) service.MessageService {
+func NewMessageService(repo repository.MessageRepository, manager db.TxManager, logger logger.DBLoggerInterface) service.MessageService {
 	return &serv{repo: repo, txManager: manager, logger: logger}
 }
 
 func (s *serv) Create(ctx context.Context, messageInfo *model.MessageInfo) (int64, error) {
 
-	var id int64
-
-	err := s.txManager.ReadCommitted(ctx, func(ctx context.Context) error {
+	id, err := s.txManager.ReadCommitted(ctx, func(ctx context.Context) (int64, error) {
+		var id int64
 		var errTx error
 		id, errTx = s.repo.Create(ctx, messageInfo)
+
 		if errTx != nil {
-			return errTx
+			return 0, errTx
 		}
 
 		logData := log.LogData{
@@ -39,10 +39,10 @@ func (s *serv) Create(ctx context.Context, messageInfo *model.MessageInfo) (int6
 		errTx = s.logger.Log(ctx, logData)
 
 		if errTx != nil {
-			return errTx
+			return 0, errTx
 		}
 
-		return nil
+		return id, nil
 	})
 
 	if err != nil {
