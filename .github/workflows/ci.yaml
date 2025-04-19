@@ -44,7 +44,7 @@ jobs:
         run: |
           echo "${{ secrets.SERVICE_PEM }}" > service.pem
           ls -la service.*
-          chmod 600 service.key
+          chmod 600 service.pem
 
       - name: Build and Push Docker Image
         run: |
