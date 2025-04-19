@@ -40,6 +40,12 @@ jobs:
           echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
           echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
 
+      - name: Create TLS certificates
+        run: |
+          echo "${{ secrets.SERVICE_PEM }}" > service.pem
+          ls -la service.*
+          chmod 600 service.key
+
       - name: Build and Push Docker Image
         run: |
           TAG_NAME=$(echo $GITHUB_SHA | head -c7)

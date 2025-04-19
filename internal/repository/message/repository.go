@@ -41,7 +41,7 @@ func (r *repo) Create(ctx context.Context, messageInfo *model.MessageInfo) (int6
 	fmt.Println(query, args)
 
 	if err != nil {
-		log.Println("failed to build query: %v", err)
+		log.Printf("failed to build query: %v\n", err)
 	}
 
 	var userID int64
@@ -54,7 +54,7 @@ func (r *repo) Create(ctx context.Context, messageInfo *model.MessageInfo) (int6
 	err = r.db.DB().QueryRowContext(ctx, q, args...).Scan(&userID)
 
 	if err != nil {
-		log.Println("failed to insert user: %v", err)
+		log.Printf("failed to insert user: %v\n", err)
 	}
 
 	return userID, nil
@@ -82,6 +82,6 @@ func (r *repo) Delete(ctx context.Context, id int64) error {
 	if err != nil {
 		log.Fatalf("failed to delete chat: %v", err)
 	}
-	  
+
 	return nil
 }

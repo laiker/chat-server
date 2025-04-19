@@ -2,7 +2,7 @@ module github.com/laiker/chat-server
 
 go 1.23.0
 
-toolchain go1.24.1
+toolchain go1.23.2
 
 require (
 	github.com/Masterminds/squirrel v1.5.4
@@ -20,7 +20,6 @@ require (
 )
 
 require (
-	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.5-20250130201111-63bb56e20495.1 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
@@ -36,5 +35,4 @@ require (
 	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250303144028-a0af3efb3deb // indirect
-	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.5.1 // indirect
 )

@@ -65,7 +65,7 @@ func Test_serv_Create(t *testing.T) {
 	}
 
 	When(deps.txManagerMock.ReadCommitted(Any[context.Context](), Any[db.Handler]())).
-		ThenReturn(int64(1), nil).
+		ThenReturn(nil).
 		ThenAnswer(callback)
 
 	a := args{
@@ -82,7 +82,7 @@ func Test_serv_Create(t *testing.T) {
 	}{
 		{
 			name:    "Success Test",
-			want:    int64(1),
+			want:    int64(0),
 			wantErr: false,
 			args:    a,
 			fields: fields{

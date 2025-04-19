@@ -2,7 +2,6 @@ package interceptor
 
 import (
 	"context"
-	"crypto/tls"
 	"log"
 
 	"github.com/laiker/auth/pkg/access_v1"
@@ -26,13 +25,15 @@ func VerifyInterceptor() grpc.UnaryServerInterceptor {
 
 		ctx = metadata.NewOutgoingContext(ctx, md)
 
-		creds := credentials.NewTLS(&tls.Config{
-			InsecureSkipVerify: true,
-		})
+		crds, err := credentials.NewClientTLSFromFile("service.pem", "localhost")
+
+		if err != nil {
+			log.Fatalf("failed to load TLS credentials: %v", err)
+		}
 
 		conn, err := grpc.NewClient(
 			":50052",
-			grpc.WithTransportCredentials(creds),
+			grpc.WithTransportCredentials(crds),
 		)
 
 		if err != nil {

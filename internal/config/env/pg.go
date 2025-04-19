@@ -12,7 +12,7 @@ const (
 	dbHost = "POSTGRES_HOST"
 	dbName = "POSTGRES_DB"
 	dbUser = "POSTGRES_USER"
-	dbPass = "POSTGRES_PASSWORD"
+	dbPass = "POSTGRES_PASSWORD" //nolint:golint,gosec
 	dbPort = "POSTGRES_PORT"
 )
 

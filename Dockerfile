@@ -10,6 +10,7 @@ FROM alpine:latest
 WORKDIR /root/
 
 COPY --from=builder /github.com/laiker/chat-server/.env .
+COPY --from=builder /github.com/laiker/chat-server/service.pem .
 COPY --from=builder /github.com/laiker/chat-server/bin/chat-server .
 
 CMD ["./chat-server"]

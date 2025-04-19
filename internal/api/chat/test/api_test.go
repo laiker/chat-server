@@ -108,10 +108,10 @@ func TestServer_SendMessage(t *testing.T) {
 	a := args{
 		ctx: context.Background(),
 		request: &chat_v1.SendMessageRequest{
-			From:      "1",
-			Text:      "message",
-			ChatId:    1,
-			Timestamp: timestamppb.New(time.Now()),
+			FromUserId: 1,
+			Text:       "message",
+			ChatId:     1,
+			Timestamp:  timestamppb.New(time.Now()),
 		},
 	}
 
@@ -173,7 +173,7 @@ func TestServer_Create(t *testing.T) {
 	a := args{
 		ctx: context.Background(),
 		request: &chat_v1.CreateRequest{
-			Usernames: []string{"1", "2", "3", "4"},
+			Ids: []int64{1, 2, 3, 4},
 		},
 	}
 

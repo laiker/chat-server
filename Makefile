@@ -8,6 +8,9 @@ GOBIN=$(LOCAL_BIN)
 install-golangci-lint:
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
 
+lint-fix:
+	$(LOCAL_BIN)/golangci-lint run --fix ./... --config .golangci.pipeline.yaml
+
 lint:
 	$(LOCAL_BIN)/golangci-lint run ./... --config .golangci.pipeline.yaml
 

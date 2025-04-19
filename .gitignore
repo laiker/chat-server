@@ -3,3 +3,5 @@
 .local.env
 .prod.env
 .env
+*.key
+*.pem

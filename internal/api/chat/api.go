@@ -52,10 +52,14 @@ func (s *Server) Delete(ctx context.Context, request *chat_v1.DeleteRequest) (*e
 	err := s.ChatService.Delete(ctx, chatId)
 
 	if err != nil {
-		log.Fatalf("failed to delete chat: %v", err)
+		log.Printf("failed to delete chat: %v", err)
 	}
 
 	err = s.MessageService.Delete(ctx, chatId)
+
+	if err != nil {
+		log.Printf("failed to delete messages: %v", err)
+	}
 
 	return &empty.Empty{}, nil
 }

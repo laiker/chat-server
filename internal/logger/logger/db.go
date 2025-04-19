@@ -34,7 +34,7 @@ func (l *DBLogger) Log(ctx context.Context, data logger.LogData) error {
 	query, args, err := sBuilder.ToSql()
 
 	if err != nil {
-		log.Println("failed to build query: %v", err)
+		log.Printf("failed to build query: %v\n", err)
 		return err
 	}
 
@@ -46,7 +46,7 @@ func (l *DBLogger) Log(ctx context.Context, data logger.LogData) error {
 	_, err = l.db.DB().ExecContext(ctx, q, args...)
 
 	if err != nil {
-		log.Println("failed to insert user: %v", err)
+		log.Printf("failed to insert user: %v\n", err)
 		return err
 	}
 

@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 
-	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/laiker/chat-server/client/db"
 	"github.com/laiker/chat-server/client/db/pg"
 	"github.com/laiker/chat-server/client/db/transaction"
@@ -23,7 +22,6 @@ import (
 type ServiceProvider struct {
 	pgConfig          config.PGConfig
 	grpcConfig        config.GRPCConfig
-	pgPool            *pgxpool.Pool
 	chatRepository    repository.ChatRepository
 	messageRepository repository.MessageRepository
 	chatService       service.ChatService

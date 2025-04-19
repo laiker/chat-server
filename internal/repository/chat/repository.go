@@ -42,7 +42,7 @@ func (r *repo) Create(ctx context.Context, chatInfo *model.ChatInfo) (int64, err
 	fmt.Println(query, args)
 
 	if err != nil {
-		log.Println("failed to build query: %v", err)
+		log.Printf("failed to build query: %v\n", err)
 	}
 
 	var chatID int64
@@ -55,7 +55,7 @@ func (r *repo) Create(ctx context.Context, chatInfo *model.ChatInfo) (int64, err
 	err = r.db.DB().QueryRowContext(ctx, q, args...).Scan(&chatID)
 
 	if err != nil {
-		log.Println("failed to insert user: %v", err)
+		log.Printf("failed to insert user: %v\n", err)
 	}
 
 	for i := 0; i < len(chatInfo.UsersID); i++ {
@@ -70,7 +70,7 @@ func (r *repo) Create(ctx context.Context, chatInfo *model.ChatInfo) (int64, err
 		fmt.Println(query, args)
 
 		if err != nil {
-			log.Println("failed to build query: %v", err)
+			log.Printf("failed to build query: %v\n", err)
 		}
 
 		q = db.Query{
@@ -79,6 +79,10 @@ func (r *repo) Create(ctx context.Context, chatInfo *model.ChatInfo) (int64, err
 		}
 
 		err = r.db.DB().QueryRowContext(ctx, q, args...).Scan(&chatID)
+
+		if err != nil {
+			log.Printf("failed to insert user: %v\n", err)
+		}
 	}
 	return chatID, nil
 }
