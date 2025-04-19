@@ -111,7 +111,7 @@ func (s *ServiceProvider) MessageRepository(ctx context.Context) repository.Mess
 
 func (s *ServiceProvider) ChatService(ctx context.Context) service.ChatService {
 	if s.chatService == nil {
-		r := servChat.NewChatService(s.ChatRepository(ctx), s.TxManager(ctx), *s.DBLogger(ctx))
+		r := servChat.NewChatService(s.ChatRepository(ctx), s.TxManager(ctx), s.DBLogger(ctx))
 		s.chatService = r
 	}
 
@@ -121,7 +121,7 @@ func (s *ServiceProvider) ChatService(ctx context.Context) service.ChatService {
 func (s *ServiceProvider) MessageService(ctx context.Context) service.MessageService {
 
 	if s.messageService == nil {
-		r := servMessage.NewMessageService(s.MessageRepository(ctx), s.TxManager(ctx), *s.DBLogger(ctx))
+		r := servMessage.NewMessageService(s.MessageRepository(ctx), s.TxManager(ctx), s.DBLogger(ctx))
 		s.messageService = r
 	}
 
@@ -137,7 +137,7 @@ func (s *ServiceProvider) ChatApi(ctx context.Context) *api.Server {
 	return s.chatApi
 }
 
-func (s *ServiceProvider) DBLogger(ctx context.Context) *logger.DBLogger {
+func (s *ServiceProvider) DBLogger(ctx context.Context) logger.DBLoggerInterface {
 	if s.dbLogger == nil {
 		l := logger.NewDBLogger(s.DB(ctx))
 		s.dbLogger = l

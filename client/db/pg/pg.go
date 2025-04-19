@@ -9,8 +9,8 @@ import (
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
-	"github.com/laiker/auth/client/db"
-	"github.com/laiker/auth/client/db/prettier"
+	"github.com/laiker/chat-server/client/db"
+	"github.com/laiker/chat-server/client/db/prettier"
 )
 
 type key string

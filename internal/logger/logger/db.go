@@ -6,7 +6,7 @@ import (
 	"log"
 
 	sq "github.com/Masterminds/squirrel"
-	"github.com/laiker/auth/client/db"
+	"github.com/laiker/chat-server/client/db"
 	"github.com/laiker/chat-server/internal/logger"
 )
 
@@ -26,7 +26,7 @@ func NewDBLogger(db db.Client) *DBLogger {
 
 func (l *DBLogger) Log(ctx context.Context, data logger.LogData) error {
 
-	sBuilder := sq.Insert("auth_user_log").
+	sBuilder := sq.Insert("chat_log").
 		Columns("name", "entity_id").
 		Values(data.Name, data.EntityID).
 		PlaceholderFormat(sq.Dollar)

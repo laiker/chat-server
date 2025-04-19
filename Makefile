@@ -1,12 +1,12 @@
 include .env
 
-LOCAL_BIN:=$(CURDIR)/bin
+LOCAL_BIN:=$(HOME)/go/src/bin
 LOCAL_MIGRATION_DIR=$(MIGRATION_DIR)
 LOCAL_MIGRATION_DSN="host=$(POSTGRES_HOST) port=$(POSTGRES_PORT) dbname=$(POSTGRES_DB) user=$(POSTGRES_USER) password=$(POSTGRES_PASSWORD) sslmode=disable"
 GOBIN=$(LOCAL_BIN)
 
 install-golangci-lint:
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.62.2
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
 
 lint:
 	$(LOCAL_BIN)/golangci-lint run ./... --config .golangci.pipeline.yaml

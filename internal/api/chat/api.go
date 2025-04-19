@@ -2,7 +2,6 @@ package chat
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"github.com/golang/protobuf/ptypes/empty"
@@ -25,9 +24,9 @@ func NewServer(chatService service.ChatService, messageService service.MessageSe
 }
 
 func (s *Server) Create(ctx context.Context, request *chat_v1.CreateRequest) (*chat_v1.CreateResponse, error) {
-	fmt.Println(converter.ToChatFromCreateRequest(request))
+
 	chatID, err := s.ChatService.Create(ctx, converter.ToChatFromCreateRequest(request))
-	fmt.Println(chatID)
+
 	if err != nil {
 		return nil, err
 	}

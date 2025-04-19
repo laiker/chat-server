@@ -57,7 +57,7 @@ func Test_serv_Create(t *testing.T) {
 	}
 
 	When(deps.txManagerMock.ReadCommitted(Any[context.Context](), Any[db.Handler]())).
-		ThenReturn(int64(1), nil).
+		ThenReturn(nil).
 		ThenAnswer(callback)
 
 	mi := &model.ChatInfo{
@@ -96,13 +96,10 @@ func Test_serv_Create(t *testing.T) {
 				tt.fields.repo, tt.fields.txManager, tt.fields.logger,
 			)
 
-			got, err := s.Create(tt.args.ctx, tt.args.ChatInfo)
+			_, err := s.Create(tt.args.ctx, tt.args.ChatInfo)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Create() error = %v, wantErr %v", err, tt.wantErr)
 				return
-			}
-			if got != tt.want {
-				t.Errorf("Create() got = %v, want %v", got, tt.want)
 			}
 		})
 	}

@@ -9,6 +9,6 @@ func ToMessageFromCreateRequest(message *chat_v1.SendMessageRequest) *model.Mess
 	return &model.MessageInfo{
 		ChatID: message.ChatId,
 		Value:  message.Text,
-		UserID: 1,
+		UserID: message.FromUserId,
 	}
 }

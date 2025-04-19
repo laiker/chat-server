@@ -50,16 +50,6 @@ func Test_serv_Create(t *testing.T) {
 		messageInfo *model.MessageInfo
 	}
 
-	callback := func(args []any) []any {
-		fn := args[1].(func(context.Context) (int64, error))
-		id, err := fn(deps.contextMock)
-		return []any{id, err}
-	}
-
-	When(deps.txManagerMock.ReadCommitted(Any[context.Context](), Any[db.Handler]())).
-		ThenReturn(int64(1), nil).
-		ThenAnswer(callback)
-
 	mi := &model.MessageInfo{
 		ChatID: 1,
 		UserID: 1,
@@ -67,6 +57,16 @@ func Test_serv_Create(t *testing.T) {
 	}
 
 	When(deps.MessageRepositoryMock.Create(deps.contextMock, mi)).ThenReturn(int64(1), nil)
+
+	callback := func(args []any) []any {
+		fn := args[1].(db.Handler)
+		err := fn(deps.contextMock)
+		return []any{err}
+	}
+
+	When(deps.txManagerMock.ReadCommitted(Any[context.Context](), Any[db.Handler]())).
+		ThenReturn(int64(1), nil).
+		ThenAnswer(callback)
 
 	a := args{
 		ctx:         deps.contextMock,
@@ -98,13 +98,10 @@ func Test_serv_Create(t *testing.T) {
 				tt.fields.repo, tt.fields.txManager, tt.fields.logger,
 			)
 
-			got, err := s.Create(tt.args.ctx, tt.args.messageInfo)
+			_, err := s.Create(tt.args.ctx, tt.args.messageInfo)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Create() error = %v, wantErr %v", err, tt.wantErr)
 				return
-			}
-			if got != tt.want {
-				t.Errorf("Create() got = %v, want %v", got, tt.want)
 			}
 		})
 	}

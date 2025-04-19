@@ -59,9 +59,10 @@ func (r *repo) Create(ctx context.Context, chatInfo *model.ChatInfo) (int64, err
 	}
 
 	for i := 0; i < len(chatInfo.UsersID); i++ {
+
 		sBuilder = sq.Insert(chatUserTableName).
 			Columns(chatIDColumn, userIDColumn).
-			Values(chatID, chatInfo.UsersID).
+			Values(chatID, chatInfo.UsersID[i]).
 			PlaceholderFormat(sq.Dollar)
 
 		query, args, err = sBuilder.ToSql()

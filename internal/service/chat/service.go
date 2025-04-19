@@ -22,12 +22,13 @@ func NewChatService(repo repository.ChatRepository, manager db.TxManager, logger
 
 func (s *serv) Create(ctx context.Context, chatInfo *model.ChatInfo) (int64, error) {
 
-	id, err := s.txManager.ReadCommitted(ctx, func(ctx context.Context) (int64, error) {
-		var id int64
+	var id int64
+
+	err := s.txManager.ReadCommitted(ctx, func(ctx context.Context) error {
 		var errTx error
 		id, errTx = s.repo.Create(ctx, chatInfo)
 		if errTx != nil {
-			return id, errTx
+			return errTx
 		}
 
 		logData := log.LogData{
@@ -38,14 +39,14 @@ func (s *serv) Create(ctx context.Context, chatInfo *model.ChatInfo) (int64, err
 		errTx = s.logger.Log(ctx, logData)
 
 		if errTx != nil {
-			return id, errTx
+			return errTx
 		}
 
-		return id, nil
+		return nil
 	})
 
 	if err != nil {
-		return 0, err
+		return id, err
 	}
 
 	return id, nil

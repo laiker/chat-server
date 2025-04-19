@@ -6,8 +6,7 @@ import (
 )
 
 func ToChatFromCreateRequest(chat *chat_v1.CreateRequest) *model.ChatInfo {
-	values := []int64{1, 2, 3, 4}
 	return &model.ChatInfo{
-		UsersID: values,
+		UsersID: chat.Ids,
 	}
 }

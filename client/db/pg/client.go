@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/jackc/pgx/v4/pgxpool"
-	"github.com/laiker/auth/client/db"
+	"github.com/laiker/chat-server/client/db"
 	"github.com/pkg/errors"
 )
 
