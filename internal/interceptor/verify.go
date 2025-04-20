@@ -2,9 +2,11 @@ package interceptor
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/laiker/auth/pkg/access_v1"
+	"github.com/laiker/chat-server/internal/config/env"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
@@ -31,8 +33,14 @@ func VerifyInterceptor() grpc.UnaryServerInterceptor {
 			log.Fatalf("failed to load TLS credentials: %v", err)
 		}
 
+		config, err := env.NewAuthConfig()
+
+		if err != nil {
+			log.Fatalf("failed to load config: %v", err)
+		}
+
 		conn, err := grpc.NewClient(
-			":50052",
+			fmt.Sprintf("%s:%s", config.Host(), "50052"),
 			grpc.WithTransportCredentials(crds),
 		)
 
