@@ -69,7 +69,7 @@ func (r *repo) Delete(ctx context.Context, id int64) error {
 	query, args, err := sBuilder.ToSql()
 
 	if err != nil {
-		log.Fatalf("failed to build query: %v", err)
+		log.Printf("failed to build query: %v", err)
 	}
 
 	q := db.Query{
@@ -80,7 +80,7 @@ func (r *repo) Delete(ctx context.Context, id int64) error {
 	_, err = r.db.DB().ExecContext(ctx, q, args...)
 
 	if err != nil {
-		log.Fatalf("failed to delete chat: %v", err)
+		log.Printf("failed to delete chat: %v", err)
 	}
 
 	return nil

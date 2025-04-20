@@ -30,13 +30,13 @@ func VerifyInterceptor() grpc.UnaryServerInterceptor {
 		crds, err := credentials.NewClientTLSFromFile("service.pem", "localhost")
 
 		if err != nil {
-			log.Fatalf("failed to load TLS credentials: %v", err)
+			log.Printf("failed to load TLS credentials: %v", err)
 		}
 
 		config, err := env.NewAuthConfig()
 
 		if err != nil {
-			log.Fatalf("failed to load config: %v", err)
+			log.Printf("failed to load config: %v", err)
 		}
 
 		conn, err := grpc.NewClient(
@@ -45,7 +45,7 @@ func VerifyInterceptor() grpc.UnaryServerInterceptor {
 		)
 
 		if err != nil {
-			log.Fatalf("failed to dial GRPC client: %v", err)
+			log.Printf("failed to dial GRPC client: %v", err)
 		}
 
 		defer func(conn *grpc.ClientConn) {
