@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"log"
+	"sync"
 
 	"github.com/laiker/chat-server/client/db"
 	"github.com/laiker/chat-server/client/db/pg"
@@ -11,12 +12,14 @@ import (
 	"github.com/laiker/chat-server/internal/config"
 	"github.com/laiker/chat-server/internal/config/env"
 	"github.com/laiker/chat-server/internal/logger/logger"
+	"github.com/laiker/chat-server/internal/model"
 	"github.com/laiker/chat-server/internal/repository"
 	repoChat "github.com/laiker/chat-server/internal/repository/chat"
 	repoMessage "github.com/laiker/chat-server/internal/repository/message"
 	"github.com/laiker/chat-server/internal/service"
 	servChat "github.com/laiker/chat-server/internal/service/chat"
 	servMessage "github.com/laiker/chat-server/internal/service/message"
+	"github.com/laiker/chat-server/pkg/chat_v1"
 )
 
 type ServiceProvider struct {
@@ -30,6 +33,8 @@ type ServiceProvider struct {
 	db                db.Client
 	txManager         db.TxManager
 	dbLogger          *logger.DBLogger
+	chatStream        *service.ChatStreamManager
+	chatChannel       *service.ChatChannelManager
 }
 
 func newServiceProvider() *ServiceProvider {
@@ -109,7 +114,13 @@ func (s *ServiceProvider) MessageRepository(ctx context.Context) repository.Mess
 
 func (s *ServiceProvider) ChatService(ctx context.Context) service.ChatService {
 	if s.chatService == nil {
-		r := servChat.NewChatService(s.ChatRepository(ctx), s.TxManager(ctx), s.DBLogger(ctx))
+		r := servChat.NewChatService(
+			s.ChatRepository(ctx),
+			s.TxManager(ctx),
+			s.DBLogger(ctx),
+			s.ChatStreamManager(),
+			s.ChatChannelManager(),
+		)
 		s.chatService = r
 	}
 
@@ -119,7 +130,7 @@ func (s *ServiceProvider) ChatService(ctx context.Context) service.ChatService {
 func (s *ServiceProvider) MessageService(ctx context.Context) service.MessageService {
 
 	if s.messageService == nil {
-		r := servMessage.NewMessageService(s.MessageRepository(ctx), s.TxManager(ctx), s.DBLogger(ctx))
+		r := servMessage.NewMessageService(s.MessageRepository(ctx), s.TxManager(ctx), s.DBLogger(ctx), s.ChatChannelManager())
 		s.messageService = r
 	}
 
@@ -142,4 +153,26 @@ func (s *ServiceProvider) DBLogger(ctx context.Context) logger.DBLoggerInterface
 	}
 
 	return s.dbLogger
+}
+
+func (s *ServiceProvider) ChatStreamManager() *service.ChatStreamManager {
+	if s.chatStream == nil {
+		s.chatStream = &service.ChatStreamManager{
+			Streams: make(map[int64]*model.ChatStream),
+			M:       sync.RWMutex{},
+		}
+	}
+
+	return s.chatStream
+}
+
+func (s *ServiceProvider) ChatChannelManager() *service.ChatChannelManager {
+	if s.chatChannel == nil {
+		s.chatChannel = &service.ChatChannelManager{
+			Channels: make(map[int64]chan *chat_v1.Message),
+			M:        sync.RWMutex{},
+		}
+	}
+
+	return s.chatChannel
 }

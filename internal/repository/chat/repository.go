@@ -78,7 +78,7 @@ func (r *repo) Create(ctx context.Context, chatInfo *model.ChatInfo) (int64, err
 			QueryRaw: query,
 		}
 
-		err = r.db.DB().QueryRowContext(ctx, q, args...).Scan(&chatID)
+		_, err = r.db.DB().ExecContext(ctx, q, args...)
 
 		if err != nil {
 			log.Printf("failed to insert user: %v\n", err)
@@ -132,4 +132,39 @@ func (r *repo) Delete(ctx context.Context, id int64) error {
 	}
 
 	return nil
+}
+
+func (r *repo) Get(ctx context.Context, id int64) (*model.Chat, error) {
+
+	sBuilder := sq.Select(idColumn, "array_agg(cu.user_id) AS users_id", createdAtColumn).
+		From(chatTableName).
+		LeftJoin("chat_user cu ON cu.chat_id = chat.id").
+		Where(sq.Eq{idColumn: id}).
+		GroupBy(idColumn).
+		PlaceholderFormat(sq.Dollar)
+
+	query, args, err := sBuilder.ToSql()
+
+	if err != nil {
+		log.Printf("failed to build query: %v", err)
+	}
+
+	q := db.Query{
+		Name:     "chat.get",
+		QueryRaw: query,
+	}
+
+	var chat model.Chat
+
+	err = r.db.DB().QueryRowContext(ctx, q, args...).Scan(&chat.Id, &chat.UsersID, &chat.CreatedAt)
+
+	if err != nil {
+		fmt.Printf("failed to find chat: %v", err)
+	}
+
+	if chat.Id <= 0 {
+		return nil, fmt.Errorf("chat not found")
+	}
+
+	return &chat, nil
 }

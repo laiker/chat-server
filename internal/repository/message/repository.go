@@ -3,12 +3,11 @@ package repository
 import (
 	"fmt"
 	"log"
-	"time"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/laiker/chat-server/client/db"
-	"github.com/laiker/chat-server/internal/model"
 	"github.com/laiker/chat-server/internal/repository"
+	"github.com/laiker/chat-server/pkg/chat_v1"
 	"golang.org/x/net/context"
 )
 
@@ -29,11 +28,12 @@ func NewMessageRepository(db db.Client) repository.MessageRepository {
 	return &repo{db: db}
 }
 
-func (r *repo) Create(ctx context.Context, messageInfo *model.MessageInfo) (int64, error) {
+func (r *repo) Create(ctx context.Context, chatId int64, messageInfo *chat_v1.Message) (int64, error) {
 
 	sBuilder := sq.Insert(tableName).
 		Columns(chatIdColumn, userIdColumn, messageColumn, createdAtColumn).
-		Values(messageInfo.ChatID, messageInfo.UserID, messageInfo.Value, time.Now()).
+		Values(chatId, messageInfo.GetFromUserId(), messageInfo.GetText(), messageInfo.GetCreatedAt().AsTime()).
+		Suffix("RETURNING id").
 		PlaceholderFormat(sq.Dollar)
 
 	query, args, err := sBuilder.ToSql()
@@ -44,20 +44,20 @@ func (r *repo) Create(ctx context.Context, messageInfo *model.MessageInfo) (int6
 		log.Printf("failed to build query: %v\n", err)
 	}
 
-	var userID int64
+	var messageID int64
 
 	q := db.Query{
 		Name:     "message.create",
 		QueryRaw: query,
 	}
 
-	err = r.db.DB().QueryRowContext(ctx, q, args...).Scan(&userID)
+	err = r.db.DB().QueryRowContext(ctx, q, args...).Scan(&messageID)
 
 	if err != nil {
-		log.Printf("failed to insert user: %v\n", err)
+		log.Printf("failed to insert message: %v\n", err)
 	}
 
-	return userID, nil
+	return messageID, nil
 }
 
 func (r *repo) Delete(ctx context.Context, id int64) error {

@@ -25,6 +25,7 @@ const _ = grpc.SupportPackageIsVersion7
 type ChatV1Client interface {
 	Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*CreateResponse, error)
 	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	Connect(ctx context.Context, in *ConnectRequest, opts ...grpc.CallOption) (ChatV1_ConnectClient, error)
 	SendMessage(ctx context.Context, in *SendMessageRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
@@ -54,6 +55,38 @@ func (c *chatV1Client) Delete(ctx context.Context, in *DeleteRequest, opts ...gr
 	return out, nil
 }
 
+func (c *chatV1Client) Connect(ctx context.Context, in *ConnectRequest, opts ...grpc.CallOption) (ChatV1_ConnectClient, error) {
+	stream, err := c.cc.NewStream(ctx, &ChatV1_ServiceDesc.Streams[0], "/chat_v1.chatV1/Connect", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &chatV1ConnectClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type ChatV1_ConnectClient interface {
+	Recv() (*Message, error)
+	grpc.ClientStream
+}
+
+type chatV1ConnectClient struct {
+	grpc.ClientStream
+}
+
+func (x *chatV1ConnectClient) Recv() (*Message, error) {
+	m := new(Message)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 func (c *chatV1Client) SendMessage(ctx context.Context, in *SendMessageRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
 	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/chat_v1.chatV1/SendMessage", in, out, opts...)
@@ -69,6 +102,7 @@ func (c *chatV1Client) SendMessage(ctx context.Context, in *SendMessageRequest, 
 type ChatV1Server interface {
 	Create(context.Context, *CreateRequest) (*CreateResponse, error)
 	Delete(context.Context, *DeleteRequest) (*empty.Empty, error)
+	Connect(*ConnectRequest, ChatV1_ConnectServer) error
 	SendMessage(context.Context, *SendMessageRequest) (*empty.Empty, error)
 	mustEmbedUnimplementedChatV1Server()
 }
@@ -82,6 +116,9 @@ func (UnimplementedChatV1Server) Create(context.Context, *CreateRequest) (*Creat
 }
 func (UnimplementedChatV1Server) Delete(context.Context, *DeleteRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
+}
+func (UnimplementedChatV1Server) Connect(*ConnectRequest, ChatV1_ConnectServer) error {
+	return status.Errorf(codes.Unimplemented, "method Connect not implemented")
 }
 func (UnimplementedChatV1Server) SendMessage(context.Context, *SendMessageRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendMessage not implemented")
@@ -135,6 +172,27 @@ func _ChatV1_Delete_Handler(srv interface{}, ctx context.Context, dec func(inter
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ChatV1_Connect_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(ConnectRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ChatV1Server).Connect(m, &chatV1ConnectServer{stream})
+}
+
+type ChatV1_ConnectServer interface {
+	Send(*Message) error
+	grpc.ServerStream
+}
+
+type chatV1ConnectServer struct {
+	grpc.ServerStream
+}
+
+func (x *chatV1ConnectServer) Send(m *Message) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 func _ChatV1_SendMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SendMessageRequest)
 	if err := dec(in); err != nil {
@@ -173,6 +231,12 @@ var ChatV1_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ChatV1_SendMessage_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "Connect",
+			Handler:       _ChatV1_Connect_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "chat.proto",
 }

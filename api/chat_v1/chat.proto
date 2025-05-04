@@ -10,6 +10,7 @@ option go_package = "github.com/laiker/chat-server/pkg/chat_v1;chat_v1";
 service chatV1 {
   rpc Create(CreateRequest) returns (CreateResponse);
   rpc Delete(DeleteRequest) returns (google.protobuf.Empty);
+  rpc Connect(ConnectRequest) returns (stream Message);
   rpc SendMessage(SendMessageRequest) returns (google.protobuf.Empty);
 }
 
@@ -25,9 +26,18 @@ message DeleteRequest {
   int64 id = 1;
 }
 
-message SendMessageRequest {
+message ConnectRequest {
+  int64 chat_id = 1;
+  int64 user_id = 2;
+}
+
+message Message {
   int64 from_user_id = 1;
   string text = 2;
-  int64 chat_id = 3;
-  google.protobuf.Timestamp timestamp = 4;
+  google.protobuf.Timestamp created_at = 3;
+}
+
+message SendMessageRequest {
+  int64 chat_id = 1;
+  Message message = 2;
 }

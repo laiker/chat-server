@@ -36,9 +36,20 @@ func (s *Server) Create(ctx context.Context, request *chat_v1.CreateRequest) (*c
 	}, nil
 }
 
+func (s *Server) Connect(request *chat_v1.ConnectRequest, stream chat_v1.ChatV1_ConnectServer) error {
+
+	err := s.ChatService.Connect(*converter.ToChatFromConnectRequest(request), stream)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s *Server) SendMessage(ctx context.Context, request *chat_v1.SendMessageRequest) (*empty.Empty, error) {
 
-	_, err := s.MessageService.Create(ctx, converter.ToMessageFromCreateRequest(request))
+	_, err := s.MessageService.Create(ctx, request.ChatId, converter.ToMessageFromCreateRequest(request))
 
 	if err != nil {
 		return nil, err

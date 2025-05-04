@@ -1,16 +1,10 @@
 package model
 
-import (
-	"time"
-)
+import "time"
 
 type MessageInfo struct {
-	ChatID int64
-	UserID int64
-	Value  string
-}
-
-type Message struct {
-	MessageInfo
+	ChatID    int64
+	UserID    int64
+	Value     string
 	CreatedAt time.Time
 }

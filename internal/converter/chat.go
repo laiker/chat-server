@@ -10,3 +10,10 @@ func ToChatFromCreateRequest(chat *chat_v1.CreateRequest) *model.ChatInfo {
 		UsersID: chat.Ids,
 	}
 }
+
+func ToChatFromConnectRequest(chat *chat_v1.ConnectRequest) *model.ChatConnect {
+	return &model.ChatConnect{
+		ChatID: chat.ChatId,
+		UserID: chat.UserId,
+	}
+}

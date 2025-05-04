@@ -58,6 +58,7 @@ func VerifyInterceptor() grpc.UnaryServerInterceptor {
 		authClient := access_v1.NewAccessV1Client(conn)
 
 		authHeaders := md.Get("authorization")
+
 		if len(authHeaders) == 0 {
 			return nil, status.Errorf(codes.Unauthenticated, "Authorization token is required")
 		}
