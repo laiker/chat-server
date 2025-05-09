@@ -85,6 +85,7 @@ func (s *serv) Connect(connect model.ChatConnect, stream chat_v1.ChatV1_ConnectS
 	s.channelManager.M.RLock()
 	chatChan, ok := s.channelManager.Channels[connect.ChatID]
 	s.channelManager.M.RUnlock()
+
 	if !ok {
 		_, err := s.repo.Get(stream.Context(), connect.ChatID)
 
@@ -110,8 +111,9 @@ func (s *serv) Connect(connect model.ChatConnect, stream chat_v1.ChatV1_ConnectS
 	chatStream.M.Lock()
 	chatStream.Streams[connect.UserID] = stream
 	chatChan <- &chat_v1.Message{
-		FromUserId: 0,
-		Text:       fmt.Sprintf("Пользователь %d подключился к чату", connect.UserID),
+		UserId:    0,
+		Text:      fmt.Sprintf("Пользователь %d подключился к чату", connect.UserID),
+		CreatedAt: nil,
 	}
 	chatStream.M.Unlock()
 
@@ -133,8 +135,8 @@ func (s *serv) Connect(connect model.ChatConnect, stream chat_v1.ChatV1_ConnectS
 			delete(chatStream.Streams, connect.UserID)
 			chatStream.M.Unlock()
 			chatChan <- &chat_v1.Message{
-				FromUserId: 0,
-				Text:       fmt.Sprintf("Пользователь %d вышел из чата", connect.UserID),
+				UserId: 0,
+				Text:   fmt.Sprintf("Пользователь %d вышел из чата", connect.UserID),
 			}
 			return nil
 		}

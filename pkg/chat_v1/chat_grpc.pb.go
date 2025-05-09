@@ -27,6 +27,7 @@ type ChatV1Client interface {
 	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	Connect(ctx context.Context, in *ConnectRequest, opts ...grpc.CallOption) (ChatV1_ConnectClient, error)
 	SendMessage(ctx context.Context, in *SendMessageRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	CreateAnonymousUser(ctx context.Context, in *CreateAnonymousUserRequest, opts ...grpc.CallOption) (*CreateAnonymousUserResponse, error)
 }
 
 type chatV1Client struct {
@@ -96,6 +97,15 @@ func (c *chatV1Client) SendMessage(ctx context.Context, in *SendMessageRequest, 
 	return out, nil
 }
 
+func (c *chatV1Client) CreateAnonymousUser(ctx context.Context, in *CreateAnonymousUserRequest, opts ...grpc.CallOption) (*CreateAnonymousUserResponse, error) {
+	out := new(CreateAnonymousUserResponse)
+	err := c.cc.Invoke(ctx, "/chat_v1.chatV1/CreateAnonymousUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ChatV1Server is the server API for ChatV1 service.
 // All implementations must embed UnimplementedChatV1Server
 // for forward compatibility
@@ -104,6 +114,7 @@ type ChatV1Server interface {
 	Delete(context.Context, *DeleteRequest) (*empty.Empty, error)
 	Connect(*ConnectRequest, ChatV1_ConnectServer) error
 	SendMessage(context.Context, *SendMessageRequest) (*empty.Empty, error)
+	CreateAnonymousUser(context.Context, *CreateAnonymousUserRequest) (*CreateAnonymousUserResponse, error)
 	mustEmbedUnimplementedChatV1Server()
 }
 
@@ -122,6 +133,9 @@ func (UnimplementedChatV1Server) Connect(*ConnectRequest, ChatV1_ConnectServer) 
 }
 func (UnimplementedChatV1Server) SendMessage(context.Context, *SendMessageRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendMessage not implemented")
+}
+func (UnimplementedChatV1Server) CreateAnonymousUser(context.Context, *CreateAnonymousUserRequest) (*CreateAnonymousUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateAnonymousUser not implemented")
 }
 func (UnimplementedChatV1Server) mustEmbedUnimplementedChatV1Server() {}
 
@@ -211,6 +225,24 @@ func _ChatV1_SendMessage_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ChatV1_CreateAnonymousUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateAnonymousUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatV1Server).CreateAnonymousUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/chat_v1.chatV1/CreateAnonymousUser",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatV1Server).CreateAnonymousUser(ctx, req.(*CreateAnonymousUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ChatV1_ServiceDesc is the grpc.ServiceDesc for ChatV1 service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -229,6 +261,10 @@ var ChatV1_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SendMessage",
 			Handler:    _ChatV1_SendMessage_Handler,
+		},
+		{
+			MethodName: "CreateAnonymousUser",
+			Handler:    _ChatV1_CreateAnonymousUser_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

@@ -8,6 +8,8 @@ import (
 func ToChatFromCreateRequest(chat *chat_v1.CreateRequest) *model.ChatInfo {
 	return &model.ChatInfo{
 		UsersID: chat.Ids,
+		Name:    chat.Name,
+		Public:  chat.Public,
 	}
 }
 

@@ -32,7 +32,7 @@ func (r *repo) Create(ctx context.Context, chatId int64, messageInfo *chat_v1.Me
 
 	sBuilder := sq.Insert(tableName).
 		Columns(chatIdColumn, userIdColumn, messageColumn, createdAtColumn).
-		Values(chatId, messageInfo.GetFromUserId(), messageInfo.GetText(), messageInfo.GetCreatedAt().AsTime()).
+		Values(chatId, messageInfo.GetUserId(), messageInfo.GetText(), messageInfo.GetCreatedAt().AsTime()).
 		Suffix("RETURNING id").
 		PlaceholderFormat(sq.Dollar)
 

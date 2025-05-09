@@ -19,6 +19,8 @@ const (
 	chatIDColumn      = "chat_id"
 	userIDColumn      = "user_id"
 	createdAtColumn   = "created_at"
+	nameColumn        = "name"
+	publicColumn      = "public"
 )
 
 type repo struct {
@@ -32,8 +34,8 @@ func NewChatRepository(db db.Client) repository.ChatRepository {
 func (r *repo) Create(ctx context.Context, chatInfo *model.ChatInfo) (int64, error) {
 
 	sBuilder := sq.Insert(chatTableName).
-		Columns(createdAtColumn).
-		Values(time.Now()).
+		Columns(createdAtColumn, nameColumn, publicColumn).
+		Values(time.Now(), chatInfo.Name, chatInfo.Public).
 		PlaceholderFormat(sq.Dollar).
 		Suffix("RETURNING id")
 

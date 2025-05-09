@@ -9,6 +9,8 @@ import (
 
 type ChatInfo struct {
 	UsersID []int64
+	Name    string
+	Public  bool
 }
 
 type Chat struct {

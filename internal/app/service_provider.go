@@ -14,27 +14,31 @@ import (
 	"github.com/laiker/chat-server/internal/logger/logger"
 	"github.com/laiker/chat-server/internal/model"
 	"github.com/laiker/chat-server/internal/repository"
+	repoAnonUser "github.com/laiker/chat-server/internal/repository/anonymous_user"
 	repoChat "github.com/laiker/chat-server/internal/repository/chat"
 	repoMessage "github.com/laiker/chat-server/internal/repository/message"
 	"github.com/laiker/chat-server/internal/service"
+	serviceAnonUser "github.com/laiker/chat-server/internal/service/anonymous_user"
 	servChat "github.com/laiker/chat-server/internal/service/chat"
 	servMessage "github.com/laiker/chat-server/internal/service/message"
 	"github.com/laiker/chat-server/pkg/chat_v1"
 )
 
 type ServiceProvider struct {
-	pgConfig          config.PGConfig
-	grpcConfig        config.GRPCConfig
-	chatRepository    repository.ChatRepository
-	messageRepository repository.MessageRepository
-	chatService       service.ChatService
-	messageService    service.MessageService
-	chatApi           *api.Server
-	db                db.Client
-	txManager         db.TxManager
-	dbLogger          *logger.DBLogger
-	chatStream        *service.ChatStreamManager
-	chatChannel       *service.ChatChannelManager
+	pgConfig            config.PGConfig
+	grpcConfig          config.GRPCConfig
+	chatRepository      repository.ChatRepository
+	messageRepository   repository.MessageRepository
+	chatService         service.ChatService
+	messageService      service.MessageService
+	chatApi             *api.Server
+	db                  db.Client
+	txManager           db.TxManager
+	dbLogger            *logger.DBLogger
+	chatStream          *service.ChatStreamManager
+	chatChannel         *service.ChatChannelManager
+	anonymousService    service.AnonymousUserService
+	anonymousRepository repository.AnonymousUserRepository
 }
 
 func newServiceProvider() *ServiceProvider {
@@ -139,7 +143,7 @@ func (s *ServiceProvider) MessageService(ctx context.Context) service.MessageSer
 
 func (s *ServiceProvider) ChatApi(ctx context.Context) *api.Server {
 	if s.chatApi == nil {
-		a := api.NewServer(s.ChatService(ctx), s.MessageService(ctx))
+		a := api.NewServer(s.ChatService(ctx), s.MessageService(ctx), s.AnonymouseUserService(ctx))
 		s.chatApi = a
 	}
 
@@ -175,4 +179,22 @@ func (s *ServiceProvider) ChatChannelManager() *service.ChatChannelManager {
 	}
 
 	return s.chatChannel
+}
+
+func (s *ServiceProvider) AnonymouseUserRepository(ctx context.Context) repository.AnonymousUserRepository {
+	if s.anonymousRepository == nil {
+		r := repoAnonUser.NewAnonymousUserRepository(ctx)
+		s.anonymousRepository = r
+	}
+
+	return s.anonymousRepository
+}
+
+func (s *ServiceProvider) AnonymouseUserService(ctx context.Context) service.AnonymousUserService {
+	if s.anonymousService == nil {
+		r := serviceAnonUser.NewAnonymousUserService(s.AnonymouseUserRepository(ctx))
+		s.anonymousService = r
+	}
+
+	return s.anonymousService
 }

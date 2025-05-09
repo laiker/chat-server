@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"sync"
+	"time"
 
 	"github.com/laiker/chat-server/internal/model"
 	"github.com/laiker/chat-server/pkg/chat_v1"
@@ -17,6 +18,14 @@ type ChatService interface {
 type MessageService interface {
 	Create(ctx context.Context, chatId int64, info *chat_v1.Message) (int64, error)
 	Delete(ctx context.Context, id int64) error
+}
+
+type AnonymousUserService interface {
+	Create(ctx context.Context, login string) *model.AnonymousUser
+	Get(ctx context.Context, id int64) (*model.AnonymousUser, bool)
+	Remove(ctx context.Context, id int64) bool
+	StartCleanupRoutine(interval, threshold time.Duration)
+	StopCleanupRoutine()
 }
 
 type ChatStreamManager struct {

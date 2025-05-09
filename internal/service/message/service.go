@@ -58,7 +58,7 @@ func (s *serv) Create(ctx context.Context, chatId int64, messageInfo *chat_v1.Me
 	if !ok {
 		return 0, status.Errorf(codes.NotFound, "chat not found")
 	}
-
+ 
 	chatChan <- messageInfo
 
 	return id, nil

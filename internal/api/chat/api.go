@@ -12,14 +12,16 @@ import (
 
 type Server struct {
 	chat_v1.UnimplementedChatV1Server
-	ChatService    service.ChatService
-	MessageService service.MessageService
+	ChatService      service.ChatService
+	MessageService   service.MessageService
+	AnonymousService service.AnonymousUserService
 }
 
-func NewServer(chatService service.ChatService, messageService service.MessageService) *Server {
+func NewServer(chatService service.ChatService, messageService service.MessageService, anonymouseService service.AnonymousUserService) *Server {
 	return &Server{
-		ChatService:    chatService,
-		MessageService: messageService,
+		ChatService:      chatService,
+		MessageService:   messageService,
+		AnonymousService: anonymouseService,
 	}
 }
 
@@ -49,7 +51,7 @@ func (s *Server) Connect(request *chat_v1.ConnectRequest, stream chat_v1.ChatV1_
 
 func (s *Server) SendMessage(ctx context.Context, request *chat_v1.SendMessageRequest) (*empty.Empty, error) {
 
-	_, err := s.MessageService.Create(ctx, request.ChatId, converter.ToMessageFromCreateRequest(request))
+	_, err := s.MessageService.Create(ctx, request.ChatId, request.Message)
 
 	if err != nil {
 		return nil, err
@@ -73,4 +75,15 @@ func (s *Server) Delete(ctx context.Context, request *chat_v1.DeleteRequest) (*e
 	}
 
 	return &empty.Empty{}, nil
+}
+
+func (s *Server) CreateAnonymousUser(ctx context.Context, request *chat_v1.CreateAnonymousUserRequest) (*chat_v1.CreateAnonymousUserResponse, error) {
+	login := request.GetLogin()
+
+	anonUser := s.AnonymousService.Create(ctx, login)
+
+	return &chat_v1.CreateAnonymousUserResponse{
+		UserId: anonUser.GetID(),
+		Login:  anonUser.GetLogin(),
+	}, nil
 }
