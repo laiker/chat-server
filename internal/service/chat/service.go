@@ -112,7 +112,7 @@ func (s *serv) Connect(connect model.ChatConnect, stream chat_v1.ChatV1_ConnectS
 	chatStream.Streams[connect.UserID] = stream
 	chatChan <- &chat_v1.Message{
 		UserId:    0,
-		Text:      fmt.Sprintf("Пользователь %d подключился к чату", connect.Login),
+		Text:      fmt.Sprintf("Пользователь %s подключился к чату", connect.Login),
 		CreatedAt: nil,
 	}
 	chatStream.M.Unlock()
@@ -136,7 +136,7 @@ func (s *serv) Connect(connect model.ChatConnect, stream chat_v1.ChatV1_ConnectS
 			chatStream.M.Unlock()
 			chatChan <- &chat_v1.Message{
 				UserId: 0,
-				Text:   fmt.Sprintf("Пользователь %d вышел из чата", connect.Login),
+				Text:   fmt.Sprintf("Пользователь %s вышел из чата", connect.Login),
 			}
 			return nil
 		}
