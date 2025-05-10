@@ -17,5 +17,6 @@ func ToChatFromConnectRequest(chat *chat_v1.ConnectRequest) *model.ChatConnect {
 	return &model.ChatConnect{
 		ChatID: chat.ChatId,
 		UserID: chat.UserId,
+		Login:  chat.Login,
 	}
 }
