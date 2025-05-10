@@ -22,6 +22,7 @@ type Chat struct {
 type ChatConnect struct {
 	ChatID int64
 	UserID int64
+	Login  string
 }
 
 type ChatStream struct {
