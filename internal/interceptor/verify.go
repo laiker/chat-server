@@ -16,9 +16,20 @@ import (
 	_ "github.com/laiker/auth/pkg/access_v1"
 )
 
+var publicMethods = map[string]bool{
+	"/chat_v1.chatV1/CreateAnonymousUser": true,
+	"/chat_v1.chatV1/Connect":             true,
+}
+
 func VerifyInterceptor() grpc.UnaryServerInterceptor {
 
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+
+		isPublic := publicMethods[info.FullMethod]
+		
+		if isPublic {
+			return handler(ctx, req)
+		}
 
 		md, ok := metadata.FromIncomingContext(ctx)
 		if !ok {
