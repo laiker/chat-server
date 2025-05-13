@@ -8,6 +8,7 @@ import (
 	"github.com/laiker/chat-server/internal/converter"
 	"github.com/laiker/chat-server/internal/service"
 	"github.com/laiker/chat-server/pkg/chat_v1"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type Server struct {
@@ -85,5 +86,29 @@ func (s *Server) CreateAnonymousUser(ctx context.Context, request *chat_v1.Creat
 	return &chat_v1.CreateAnonymousUserResponse{
 		UserId: anonUser.GetID(),
 		Login:  anonUser.GetLogin(),
+	}, nil
+}
+
+func (s *Server) GetUserChats(ctx context.Context, request *chat_v1.GetUserChatsRequest) (*chat_v1.GetUserChatsResponse, error) {
+
+	chats, err := s.ChatService.GetUserChats(ctx, request.GetId())
+
+	if err != nil {
+		return nil, err
+	}
+
+	respChats := make([]*chat_v1.Chat, len(chats))
+
+	for i, chat := range chats {
+		respChats[i] = &chat_v1.Chat{
+			Id:        chat.Id,
+			Name:      chat.Name,
+			IsPublic:  chat.Public,
+			CreatedAt: timestamppb.New(chat.CreatedAt),
+		}
+	}
+
+	return &chat_v1.GetUserChatsResponse{
+		Chats: respChats,
 	}, nil
 }

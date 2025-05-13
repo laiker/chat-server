@@ -8,13 +8,16 @@ import (
 )
 
 type ChatInfo struct {
-	UsersID []int64
-	Name    string
-	Public  bool
+	UsersID   []int64
+	Name      string
+	Public    bool
+	CreatedAt time.Time
 }
 
 type Chat struct {
 	Id        int64     `db:"id"`
+	Name      string    `db:"name"`
+	Public    bool      `db:"public"`
 	UsersID   []int64   `db:"users_id"`
 	CreatedAt time.Time `db:"created_at"`
 }

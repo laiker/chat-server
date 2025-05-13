@@ -6,6 +6,7 @@ import (
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
+	"github.com/jackc/pgtype"
 	"github.com/laiker/chat-server/client/db"
 	"github.com/laiker/chat-server/internal/model"
 	"github.com/laiker/chat-server/internal/repository"
@@ -169,4 +170,59 @@ func (r *repo) Get(ctx context.Context, id int64) (*model.Chat, error) {
 	}
 
 	return &chat, nil
+}
+
+func (r *repo) GetUserChats(ctx context.Context, userID int64) ([]model.Chat, error) {
+
+	sBuilder := sq.Select(idColumn, "array_agg(cu.user_id) AS users_id", createdAtColumn, nameColumn, publicColumn).
+		From(chatTableName).
+		LeftJoin("chat_user cu ON cu.chat_id = chat.id").
+		Where(sq.Or{
+			sq.Eq{userIDColumn: userID},
+			sq.Eq{publicColumn: true},
+		}).
+		GroupBy(idColumn).
+		PlaceholderFormat(sq.Dollar)
+
+	query, args, err := sBuilder.ToSql()
+
+	if err != nil {
+		log.Printf("failed to build query: %v", err)
+		return nil, err
+	}
+
+	q := db.Query{
+		Name:     "chat.get_user_chats",
+		QueryRaw: query,
+	}
+
+	var chats []model.Chat
+
+	rows, err := r.db.DB().QueryContext(ctx, q, args...)
+
+	if err != nil {
+		log.Printf("failed to find chats: %v", err)
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var chat model.Chat
+		var usersIDSlice pgtype.Int4Array
+		err = rows.Scan(&chat.Id, &usersIDSlice, &chat.CreatedAt, &chat.Name, &chat.Public)
+
+		if err != nil {
+			log.Printf("failed to scan chat: %v", err)
+			return nil, err
+		}
+
+		for _, elem := range usersIDSlice.Elements {
+			chat.UsersID = append(chat.UsersID, int64(elem.Int))
+		}
+
+		chats = append(chats, chat)
+	}
+
+	return chats, nil
 }

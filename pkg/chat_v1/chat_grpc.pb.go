@@ -24,6 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ChatV1Client interface {
 	Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*CreateResponse, error)
+	GetUserChats(ctx context.Context, in *GetUserChatsRequest, opts ...grpc.CallOption) (*GetUserChatsResponse, error)
 	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	Connect(ctx context.Context, in *ConnectRequest, opts ...grpc.CallOption) (ChatV1_ConnectClient, error)
 	SendMessage(ctx context.Context, in *SendMessageRequest, opts ...grpc.CallOption) (*empty.Empty, error)
@@ -41,6 +42,15 @@ func NewChatV1Client(cc grpc.ClientConnInterface) ChatV1Client {
 func (c *chatV1Client) Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*CreateResponse, error) {
 	out := new(CreateResponse)
 	err := c.cc.Invoke(ctx, "/chat_v1.chatV1/Create", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chatV1Client) GetUserChats(ctx context.Context, in *GetUserChatsRequest, opts ...grpc.CallOption) (*GetUserChatsResponse, error) {
+	out := new(GetUserChatsResponse)
+	err := c.cc.Invoke(ctx, "/chat_v1.chatV1/GetUserChats", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -111,6 +121,7 @@ func (c *chatV1Client) CreateAnonymousUser(ctx context.Context, in *CreateAnonym
 // for forward compatibility
 type ChatV1Server interface {
 	Create(context.Context, *CreateRequest) (*CreateResponse, error)
+	GetUserChats(context.Context, *GetUserChatsRequest) (*GetUserChatsResponse, error)
 	Delete(context.Context, *DeleteRequest) (*empty.Empty, error)
 	Connect(*ConnectRequest, ChatV1_ConnectServer) error
 	SendMessage(context.Context, *SendMessageRequest) (*empty.Empty, error)
@@ -124,6 +135,9 @@ type UnimplementedChatV1Server struct {
 
 func (UnimplementedChatV1Server) Create(context.Context, *CreateRequest) (*CreateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
+}
+func (UnimplementedChatV1Server) GetUserChats(context.Context, *GetUserChatsRequest) (*GetUserChatsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserChats not implemented")
 }
 func (UnimplementedChatV1Server) Delete(context.Context, *DeleteRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
@@ -164,6 +178,24 @@ func _ChatV1_Create_Handler(srv interface{}, ctx context.Context, dec func(inter
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ChatV1Server).Create(ctx, req.(*CreateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ChatV1_GetUserChats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserChatsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatV1Server).GetUserChats(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/chat_v1.chatV1/GetUserChats",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatV1Server).GetUserChats(ctx, req.(*GetUserChatsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -253,6 +285,10 @@ var ChatV1_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Create",
 			Handler:    _ChatV1_Create_Handler,
+		},
+		{
+			MethodName: "GetUserChats",
+			Handler:    _ChatV1_GetUserChats_Handler,
 		},
 		{
 			MethodName: "Delete",

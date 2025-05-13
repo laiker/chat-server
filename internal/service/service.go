@@ -13,6 +13,7 @@ type ChatService interface {
 	Create(ctx context.Context, info *model.ChatInfo) (int64, error)
 	Delete(ctx context.Context, id int64) error
 	Connect(info model.ChatConnect, stream chat_v1.ChatV1_ConnectServer) error
+	GetUserChats(ctx context.Context, id int64) ([]model.Chat, error)
 }
 
 type MessageService interface {

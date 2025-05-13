@@ -77,11 +77,18 @@ func (s *serv) Create(ctx context.Context, chatInfo *model.ChatInfo) (int64, err
 	return id, nil
 }
 
+func (s *serv) GetUserChats(ctx context.Context, userId int64) ([]model.Chat, error) {
+	return s.repo.GetUserChats(ctx, userId)
+}
+
 func (s *serv) Delete(ctx context.Context, id int64) error {
 	return s.repo.Delete(ctx, id)
 }
 
 func (s *serv) Connect(connect model.ChatConnect, stream chat_v1.ChatV1_ConnectServer) error {
+
+	fmt.Printf("connect: %+v\n", connect)
+
 	s.channelManager.M.RLock()
 	chatChan, ok := s.channelManager.Channels[connect.ChatID]
 	s.channelManager.M.RUnlock()

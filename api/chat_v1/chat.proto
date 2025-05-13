@@ -9,6 +9,7 @@ option go_package = "github.com/laiker/chat-server/pkg/chat_v1;chat_v1";
 
 service chatV1 {
   rpc Create(CreateRequest) returns (CreateResponse);
+  rpc GetUserChats(GetUserChatsRequest) returns (GetUserChatsResponse);
   rpc Delete(DeleteRequest) returns (google.protobuf.Empty);
   rpc Connect(ConnectRequest) returns (stream Message);
   rpc SendMessage(SendMessageRequest) returns (google.protobuf.Empty);
@@ -26,13 +27,24 @@ message CreateAnonymousUserResponse {
 
 message CreateRequest {
   repeated int64 ids = 1;
-  string name = 2;
-  bool public = 3;
+  int64 id = 2;
+  string name = 3;
+  bool is_public = 4;
+  google.protobuf.Timestamp created_at = 5;
 }
 
 message CreateResponse {
   int64 id = 1;
 }
+
+message GetUserChatsRequest {
+  int64 id = 1;
+}
+
+message GetUserChatsResponse {
+  repeated Chat chats = 1;
+}
+
 
 message DeleteRequest {
   int64 id = 1;
@@ -42,6 +54,13 @@ message ConnectRequest {
   int64 chat_id = 1;
   int64 user_id = 2;
   string login = 3;
+}
+
+message Chat {
+  int64 id = 1;
+  string name = 2;
+  bool is_public = 3;
+  google.protobuf.Timestamp created_at = 4;
 }
 
 message Message {
