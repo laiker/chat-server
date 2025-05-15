@@ -20,6 +20,7 @@ var publicMethods = map[string]bool{
 	"/chat_v1.chatV1/CreateAnonymousUser": true,
 	"/chat_v1.chatV1/Connect":             true,
 	"/chat_v1.chatV1/SendMessage":         true,
+	"/chat_v1.chatV1/GetUserChats":        true,
 }
 
 func VerifyInterceptor() grpc.UnaryServerInterceptor {
