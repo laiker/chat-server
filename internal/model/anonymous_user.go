@@ -9,7 +9,7 @@ type AnonymousUser struct {
 }
 
 func NewAnonymousUser(login string) *AnonymousUser {
-	temporaryID := -1 * time.Now().UnixNano()
+	temporaryID := -1 * (time.Now().UnixNano() % (1 << 31))
 
 	return &AnonymousUser{
 		id:        temporaryID,
