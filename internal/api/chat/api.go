@@ -40,14 +40,26 @@ func (s *Server) Create(ctx context.Context, request *chat_v1.CreateRequest) (*c
 }
 
 func (s *Server) Connect(request *chat_v1.ConnectRequest, stream chat_v1.ChatV1_ConnectServer) error {
-
-	err := s.ChatService.Connect(*converter.ToChatFromConnectRequest(request), stream)
-
+	err := s.ChatService.InitializeConnection(*converter.ToChatFromConnectRequest(request), stream)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	log.Println("Отправка истории сообщений")
+	historyMessage, err := s.MessageService.GetHistory(stream.Context(), request.ChatId)
+	if err != nil {
+		return err
+	}
+
+	for _, message := range historyMessage {
+		log.Println("Отправляем сообщение из истории: ", message)
+		if err := stream.Send(message); err != nil {
+			log.Printf("Ошибка отправки сообщения из истории: %v", err)
+			return err
+		}
+	}
+
+	return s.ChatService.Connect(*converter.ToChatFromConnectRequest(request), stream)
 }
 
 func (s *Server) SendMessage(ctx context.Context, request *chat_v1.SendMessageRequest) (*empty.Empty, error) {

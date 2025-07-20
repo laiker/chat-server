@@ -18,6 +18,7 @@ type ChatRepository interface {
 type MessageRepository interface {
 	Create(ctx context.Context, chatId int64, info *chat_v1.Message) (int64, error)
 	Delete(ctx context.Context, id int64) error
+	GetHistory(ctx context.Context, chatId int64, limit int64) ([]*chat_v1.Message, error)
 }
 
 type AnonymousUserRepository interface {

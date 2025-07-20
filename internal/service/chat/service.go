@@ -85,27 +85,25 @@ func (s *serv) Delete(ctx context.Context, id int64) error {
 	return s.repo.Delete(ctx, id)
 }
 
-func (s *serv) Connect(connect model.ChatConnect, stream chat_v1.ChatV1_ConnectServer) error {
-
+func (s *serv) InitializeConnection(connect model.ChatConnect, stream chat_v1.ChatV1_ConnectServer) error {
 	fmt.Printf("connect: %+v\n", connect)
 
 	s.channelManager.M.RLock()
-	chatChan, ok := s.channelManager.Channels[connect.ChatID]
+	_, ok := s.channelManager.Channels[connect.ChatID]
 	s.channelManager.M.RUnlock()
 
 	if !ok {
 		_, err := s.repo.Get(stream.Context(), connect.ChatID)
-
 		if err != nil {
 			return status.Errorf(codes.NotFound, err.Error())
 		}
 
 		s.channelManager.M.Lock()
 		s.channelManager.Channels[connect.ChatID] = make(chan *chat_v1.Message, 100)
-		chatChan = s.channelManager.Channels[connect.ChatID]
 		s.channelManager.M.Unlock()
 	}
 
+	// Регистрируем stream
 	s.streamManager.M.Lock()
 	if _, okChat := s.streamManager.Streams[connect.ChatID]; !okChat {
 		s.streamManager.Streams[connect.ChatID] = &model.ChatStream{
@@ -117,13 +115,27 @@ func (s *serv) Connect(connect model.ChatConnect, stream chat_v1.ChatV1_ConnectS
 
 	chatStream.M.Lock()
 	chatStream.Streams[connect.UserID] = stream
-	chatChan <- &chat_v1.Message{
-		UserId:    0,
-		Text:      fmt.Sprintf("Пользователь %s подключился к чату", connect.Login),
-		CreatedAt: nil,
-	}
 	chatStream.M.Unlock()
 
+	return nil
+}
+
+func (s *serv) Connect(connect model.ChatConnect, stream chat_v1.ChatV1_ConnectServer) error {
+	s.channelManager.M.RLock()
+	chatChan := s.channelManager.Channels[connect.ChatID]
+	s.channelManager.M.RUnlock()
+
+	s.streamManager.M.RLock()
+	chatStream := s.streamManager.Streams[connect.ChatID]
+	s.streamManager.M.RUnlock()
+
+	// Отправляем сообщение о подключении
+	chatChan <- &chat_v1.Message{
+		UserId: 0,
+		Text:   fmt.Sprintf("Пользователь %s подключился к чату", connect.Login),
+	}
+
+	// Бесконечный цикл для новых сообщений
 	for {
 		select {
 		case msg, okCh := <-chatChan:
@@ -131,16 +143,20 @@ func (s *serv) Connect(connect model.ChatConnect, stream chat_v1.ChatV1_ConnectS
 				return nil
 			}
 
+			chatStream.M.RLock()
 			for _, st := range chatStream.Streams {
 				if err := st.Send(msg); err != nil {
+					chatStream.M.RUnlock()
 					return err
 				}
 			}
+			chatStream.M.RUnlock()
 
 		case <-stream.Context().Done():
 			chatStream.M.Lock()
 			delete(chatStream.Streams, connect.UserID)
 			chatStream.M.Unlock()
+
 			chatChan <- &chat_v1.Message{
 				UserId: 0,
 				Text:   fmt.Sprintf("Пользователь %s вышел из чата", connect.Login),

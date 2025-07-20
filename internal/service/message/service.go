@@ -51,19 +51,33 @@ func (s *serv) Create(ctx context.Context, chatId int64, messageInfo *chat_v1.Me
 		return 0, err
 	}
 
+	ok, err := s.SendToChannel(ctx, chatId, messageInfo)
+
+	if !ok {
+		return 0, status.Errorf(codes.NotFound, "chat not found")
+	}
+
+	return id, nil
+}
+
+func (s *serv) SendToChannel(ctx context.Context, chatId int64, message *chat_v1.Message) (bool, error) {
 	s.channelManager.M.RLock()
 	chatChan, ok := s.channelManager.Channels[chatId]
 	defer s.channelManager.M.RUnlock()
 
 	if !ok {
-		return 0, status.Errorf(codes.NotFound, "chat not found")
+		return false, status.Errorf(codes.NotFound, "chat not found")
 	}
- 
-	chatChan <- messageInfo
 
-	return id, nil
+	chatChan <- message
+
+	return true, nil
 }
 
 func (s *serv) Delete(ctx context.Context, id int64) error {
 	return s.repo.Delete(ctx, id)
+}
+
+func (s *serv) GetHistory(ctx context.Context, id int64) ([]*chat_v1.Message, error) {
+	return s.repo.GetHistory(ctx, id, 200)
 }
